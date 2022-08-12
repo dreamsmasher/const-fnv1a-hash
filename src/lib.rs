@@ -71,3 +71,32 @@ pub const fn fnv1a_hash_16_xor(bytes: &[u8], limit: Option<usize>) -> u16 {
 pub const fn fnv1a_hash_str_16_xor(input: &str) -> u16 {
     fnv1a_hash_16_xor(input.as_bytes(), None)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn test_hash<T: Eq + core::fmt::Debug>(hash_func: impl FnOnce(&str) -> T, source_str: &str, expected: T) {
+        let hashed = hash_func(source_str);
+        let bit_size = core::mem::size_of::<T>() * 8;
+        assert_eq!(hashed, expected, "fnv1a-{bit_size} hash for {source_str}")
+    }
+
+    const FOOBAR: &str = "foobar";
+    const FOOBAR_HASH_32:  u32  = 0xbf9cf968;
+    const FOOBAR_HASH_64:  u64  = 0x85944171f73967e8;
+    const FOOBAR_HASH_128: u128 = 0x343e1662793c64bf6f0d3597ba446f18;
+
+    #[test]
+    fn test_32() {
+        test_hash(fnv1a_hash_str_32, FOOBAR, FOOBAR_HASH_32)
+    }
+    #[test]
+    fn test_64() {
+        test_hash(fnv1a_hash_str_64, FOOBAR, FOOBAR_HASH_64)
+     }
+    #[test]
+    fn test_128() { 
+        test_hash(fnv1a_hash_str_128, FOOBAR, FOOBAR_HASH_128)
+    }
+}
